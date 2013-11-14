@@ -1,6 +1,5 @@
 /*******************| Inclusions |*************************************/
 #include "IEEE_802.15.4.h"
-#include <IEEE_802.15.4_cfg.h>
 #include <ioCC2530.h>
 #include <board.h>
 
@@ -16,6 +15,23 @@
 /*******************| Global variables |*******************************/
 
 /*******************| Function definition |****************************/
+
+/**
+ * Enables needed interrupts for IEEE_802.15.4 radio. Global interrupts are
+ * note enabled by this function. Thus, need to call enableAllInterrupt();
+ * outside of this function
+*/
+void IEE802154_radioInit()
+{
+  /* enable general RF interrupt */
+  enableInterrupt(IEN2, IEEE802154_IEN2_RFIE);
+  /* enable rx done interrupt */
+  enableInterrupt(RFIRQM0, IEEE802154_RFIRQF0_RXPKTDONE);
+   
+  IEEE802154_ISRFOFF(); /* disables RX/TX and the frequency synthesizer */
+  IEEE802154_ISFLUSHRX();
+  IEEE802154_ISRXON(); /* enables and calibrates the frequency synthesizer for RX */
+}
 
 /**
  * ISR for radio Rx interrupt
@@ -54,7 +70,8 @@ __near_func __interrupt void IEE802154_radioRxISR(void)
 
 
 /**
- * Blocking send of data frame via radio. 
+ * Blocking send of data frame via radio.
+ * @param: header: header of frame including pointer to payload
  * @param: payloadLength: length of frame payload excluding header and CRC
  * NOTE: only auto-crc is supported right now
 */
@@ -70,10 +87,10 @@ void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8 pay
   
   /* write length first. Size of header (without pointer to payload) + 
      payloadlength + 2 bytes CRC */
-  RFD = (sizeof(IEE802154_DataFrameHeader_t)-1) + payloadLength + IEEE802154_CRCLENGTH;
+  RFD = (sizeof(IEE802154_DataFrameHeader_t)-sizeof(uint8*)) + payloadLength + IEEE802154_CRCLENGTH;
   
   /* now write IEE 802.15.4 header (without pointer to payload of course) */
-  for(i=0;i<sizeof(IEE802154_DataFrameHeader_t)-1 ;i++)
+  for(i=0;i<sizeof(IEE802154_DataFrameHeader_t)-sizeof(uint8*) ;i++)
   {
     RFD = ((uint8*)header)[i];
   }
