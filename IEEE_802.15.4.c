@@ -23,6 +23,32 @@
 */
 void IEE802154_radioInit()
 {
+  
+  /* Configure frama handline (FRMCTRL0) use auto ACK and auto CRC for convenience */
+  FRMCTRL0 |= (IEEE802154_FRMCTRL0_AUTOACK_ENABLED | IEEE802154_FRMCTRL0_AUTOCRC_ENABLED);
+    
+  /* according to (swru191c.pdf) 23.15.1 Register Settings Update
+     This section contains a summary of the register settings that must be 
+     updated from their default value to have optimal performance.*/
+  AGCCTRL1 = 0x15;    /* Adjusts AGC target value */
+  TXFILTCFG = 0x09;   /* Sets TX anti-aliasing filter to appropriate bandwidth */
+  FSCAL1 = 0x00;      /* Recommended setting for lowest spurious emission */
+    
+  /* according to (swru191c.pdf) 23.15.3 Register Descriptions
+     IEEE 802.15.4-2006 specifies a frequency range from 2405 MHz to 2480 MHz
+     with 16 channels 5 MHz apart. The channels are numbered 11 through 26. For an
+     IEEE 802.15.4-2006 compliant system, the only valid settings are thus
+     FREQ[6:0] = 11 + 5 (channel number – 11).*/   
+  FREQCTRL =  IEEE802154_FREQCTRL_CHANNEL_OFFSET + IEEE802154_FREQCTRL_CHANNEL_FAKTOR * (IEEE802154_Channel - IEEE802154_FREQCTRL_CHANNEL_OFFSET);
+    
+  /* set short address */
+  SHORT_ADDR0 = LO_UINT16(IEEE802154_ShortAddress);
+  SHORT_ADDR1 = HI_UINT16(IEEE802154_ShortAddress);
+    
+  /* set PANID */
+  PAN_ID0 = LO_UINT16(IEEE802154_PanID);
+  PAN_ID1 = HI_UINT16(IEEE802154_PanID);
+  
   /* enable general RF interrupt */
   enableInterrupt(IEN2, IEEE802154_IEN2_RFIE);
   /* enable rx done interrupt */
