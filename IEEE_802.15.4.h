@@ -9,12 +9,6 @@
 #include <IEEE_802.15.4_cfg.h>
    
 /*******************| Macros |*****************************************/
-/**
- * interrupt flag bits 
-*/
-#define IEEE802154_RFIRQF0_RXPKTDONE            0x40
-#define IEEE802154_RFIRQF1_TXDONE               0x02
-#define IEEE802154_IEN2_RFIE                    0x01
 
 /**
  * Lenght of CRC in bytes
@@ -57,18 +51,6 @@
 */
 #define IEEE802154_ISFLUSHTX()                  RFST = 0xEE
 
-#define IEEE802154_FRMCTRL0_SW_CRC_MODE_CORRELATION     0x00
-#define IEEE802154_FRMCTRL0_SW_CRC_MODE_SRCRESINDEX     0x80
-#define IEEE802154_FRMCTRL0_AUTOCRC_DISABLED            0x00
-#define IEEE802154_FRMCTRL0_AUTOCRC_ENABLED             0x40
-#define IEEE802154_FRMCTRL0_AUTOACK_DISABLED            0x00
-#define IEEE802154_FRMCTRL0_AUTOACK_ENABLED             0x20
-#define IEEE802154_FRMCTRL0_ENERGY_SCAN_RECENT          0x00
-#define IEEE802154_FRMCTRL0_ENERGY_SCAN_PEAK            0x10
-
-#define IEEE802154_FREQCTRL_CHANNEL_OFFSET              (uint8)11
-#define IEEE802154_FREQCTRL_CHANNEL_FAKTOR              (uint8)5
-
 /**
  * For an explanation see 802.15.4g-2012.pdf Chapter 5.2.1.1 Frame Control field.
  * Values for IEEE802154_FCF_t
@@ -95,6 +77,28 @@
 #define IEEE802154_ADDRESS_MODE_64BIT           0x03
 /* frame version 2 bit 12:13 */
 /* source address mode 2 bit 14:15 */
+
+/**
+ * Definition for different register values needed for IEEE 802.15.4 radio
+*/
+#define FRMCTRL0_SW_CRC_MODE_CORRELATION     0x00
+#define FRMCTRL0_SW_CRC_MODE_SRCRESINDEX     0x80
+#define FRMCTRL0_AUTOCRC_DISABLED            0x00
+#define FRMCTRL0_AUTOCRC_ENABLED             0x40
+#define FRMCTRL0_AUTOACK_DISABLED            0x00
+#define FRMCTRL0_AUTOACK_ENABLED             0x20
+#define FRMCTRL0_ENERGY_SCAN_RECENT          0x00
+#define FRMCTRL0_ENERGY_SCAN_PEAK            0x10
+
+#define FREQCTRL_CHANNEL_OFFSET              (uint8)11
+#define FREQCTRL_CHANNEL_FAKTOR              (uint8)5
+
+/**
+ * interrupt flag bits 
+*/
+#define RFIRQF0_RXPKTDONE            0x40
+#define RFIRQF1_TXDONE               0x02
+#define IEN2_RFIE                    0x01
 
    
 /*******************| Type definitions |*******************************/

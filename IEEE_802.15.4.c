@@ -25,7 +25,7 @@ void IEE802154_radioInit()
 {
   
   /* Configure frama handline (FRMCTRL0) use auto ACK and auto CRC for convenience */
-  FRMCTRL0 |= (IEEE802154_FRMCTRL0_AUTOACK_ENABLED | IEEE802154_FRMCTRL0_AUTOCRC_ENABLED);
+  FRMCTRL0 |= (FRMCTRL0_AUTOACK_ENABLED | FRMCTRL0_AUTOCRC_ENABLED);
     
   /* according to (swru191c.pdf) 23.15.1 Register Settings Update
      This section contains a summary of the register settings that must be 
@@ -39,7 +39,7 @@ void IEE802154_radioInit()
      with 16 channels 5 MHz apart. The channels are numbered 11 through 26. For an
      IEEE 802.15.4-2006 compliant system, the only valid settings are thus
      FREQ[6:0] = 11 + 5 (channel number – 11).*/   
-  FREQCTRL =  IEEE802154_FREQCTRL_CHANNEL_OFFSET + IEEE802154_FREQCTRL_CHANNEL_FAKTOR * (IEEE802154_Channel - IEEE802154_FREQCTRL_CHANNEL_OFFSET);
+  FREQCTRL =  FREQCTRL_CHANNEL_OFFSET + FREQCTRL_CHANNEL_FAKTOR * (IEEE802154_Channel - FREQCTRL_CHANNEL_OFFSET);
     
   /* set short address */
   SHORT_ADDR0 = LO_UINT16(IEEE802154_ShortAddress);
@@ -50,9 +50,9 @@ void IEE802154_radioInit()
   PAN_ID1 = HI_UINT16(IEEE802154_PanID);
   
   /* enable general RF interrupt */
-  enableInterrupt(IEN2, IEEE802154_IEN2_RFIE);
+  enableInterrupt(IEN2, IEN2_RFIE);
   /* enable rx done interrupt */
-  enableInterrupt(RFIRQM0, IEEE802154_RFIRQF0_RXPKTDONE);
+  enableInterrupt(RFIRQM0, RFIRQF0_RXPKTDONE);
    
   IEEE802154_ISRFOFF(); /* disables RX/TX and the frequency synthesizer */
   IEEE802154_ISFLUSHRX();
@@ -67,7 +67,7 @@ __near_func __interrupt void IEE802154_radioRxISR(void)
 {
   uint8 overallBufferLength;
   uint8 payloadLength;
-  if( RFIRQF0 & IEEE802154_RFIRQF0_RXPKTDONE ) /* A complete frame has been received. */
+  if( RFIRQF0 & RFIRQF0_RXPKTDONE ) /* A complete frame has been received. */
   {
     /* get overall buffer length since it could be more than one frame in FIFO */
     overallBufferLength = RXFIFOCNT;
@@ -82,7 +82,7 @@ __near_func __interrupt void IEE802154_radioRxISR(void)
     else /* nope, data frame */
     {
     }
-    clearInterruptFlag(RFIRQF0, IEEE802154_RFIRQF0_RXPKTDONE);  // Clear package received interrupt flag
+    clearInterruptFlag(RFIRQF0, RFIRQF0_RXPKTDONE);  // Clear package received interrupt flag
     
     /** TODO: read RSSI or LQI to global variable */
   }
@@ -109,7 +109,7 @@ void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8 pay
 
   IEEE802154_ISFLUSHTX();          /* Flush TX FIFO */
 
-  clearInterruptFlag(RFIRQF1, IEEE802154_RFIRQF1_TXDONE);   /* Clear TX interrupt */
+  clearInterruptFlag(RFIRQF1, RFIRQF1_TXDONE);   /* Clear TX interrupt */
   
   /* write length first. Size of header (without pointer to payload) + 
      payloadlength + 2 bytes CRC */
@@ -131,6 +131,6 @@ void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8 pay
   IEEE802154_ISTXON();
   
   // wait until transmission is finished
-  while ((RFIRQF1 & IEEE802154_RFIRQF1_TXDONE) == 0) ;
-  clearInterruptFlag(RFIRQF1, IEEE802154_RFIRQF1_TXDONE);   // Clear TX interrupt
+  while ((RFIRQF1 & RFIRQF1_TXDONE) == 0) ;
+  clearInterruptFlag(RFIRQF1, RFIRQF1_TXDONE);   // Clear TX interrupt
 }
