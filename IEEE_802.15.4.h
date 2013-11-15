@@ -81,24 +81,24 @@
 /**
  * Definition for different register values needed for IEEE 802.15.4 radio
 */
-#define FRMCTRL0_SW_CRC_MODE_CORRELATION     0x00
-#define FRMCTRL0_SW_CRC_MODE_SRCRESINDEX     0x80
-#define FRMCTRL0_AUTOCRC_DISABLED            0x00
-#define FRMCTRL0_AUTOCRC_ENABLED             0x40
-#define FRMCTRL0_AUTOACK_DISABLED            0x00
-#define FRMCTRL0_AUTOACK_ENABLED             0x20
-#define FRMCTRL0_ENERGY_SCAN_RECENT          0x00
-#define FRMCTRL0_ENERGY_SCAN_PEAK            0x10
+#define FRMCTRL0_SW_CRC_MODE_CORRELATION        0x00
+#define FRMCTRL0_SW_CRC_MODE_SRCRESINDEX        0x80
+#define FRMCTRL0_AUTOCRC_DISABLED               0x00
+#define FRMCTRL0_AUTOCRC_ENABLED                0x40
+#define FRMCTRL0_AUTOACK_DISABLED               0x00
+#define FRMCTRL0_AUTOACK_ENABLED                0x20
+#define FRMCTRL0_ENERGY_SCAN_RECENT             0x00
+#define FRMCTRL0_ENERGY_SCAN_PEAK               0x10
 
-#define FREQCTRL_CHANNEL_OFFSET              (uint8)11
-#define FREQCTRL_CHANNEL_FAKTOR              (uint8)5
+#define FREQCTRL_CHANNEL_OFFSET                 (uint8)11
+#define FREQCTRL_CHANNEL_FAKTOR                 (uint8)5
 
 /**
  * interrupt flag bits 
 */
-#define RFIRQF0_RXPKTDONE            0x40
-#define RFIRQF1_TXDONE               0x02
-#define IEN2_RFIE                    0x01
+#define RFIRQF0_RXPKTDONE                       0x40
+#define RFIRQF1_TXDONE                          0x02
+#define IEN2_RFIE                               0x01
 
    
 /*******************| Type definitions |*******************************/
