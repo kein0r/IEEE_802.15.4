@@ -65,8 +65,8 @@ void IEE802154_radioInit()
 #pragma vector = RF_VECTOR
 __near_func __interrupt void IEE802154_radioRxISR(void)
 {
-  uint8 overallBufferLength;
-  uint8 payloadLength;
+  uint8_t overallBufferLength;
+  uint8_t payloadLength;
   if( RFIRQF0 & RFIRQF0_RXPKTDONE ) /* A complete frame has been received. */
   {
     /* get overall buffer length since it could be more than one frame in FIFO */
@@ -101,9 +101,9 @@ __near_func __interrupt void IEE802154_radioRxISR(void)
  * @param: payloadLength: length of frame payload excluding header and CRC
  * NOTE: only auto-crc is supported right now
 */
-void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8 payloadLength)
+void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8_t payloadLength)
 {
-  uint8 i;
+  uint8_t i;
   
   /* todo: check length */
 
@@ -113,12 +113,12 @@ void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8 pay
   
   /* write length first. Size of header (without pointer to payload) + 
      payloadlength + 2 bytes CRC */
-  RFD = (sizeof(IEE802154_DataFrameHeader_t)-sizeof(uint8*)) + payloadLength + IEEE802154_CRCLENGTH;
+  RFD = (sizeof(IEE802154_DataFrameHeader_t)-sizeof(uint8_t*)) + payloadLength + IEEE802154_CRCLENGTH;
   
   /* now write IEE 802.15.4 header (without pointer to payload of course) */
-  for(i=0;i<sizeof(IEE802154_DataFrameHeader_t)-sizeof(uint8*) ;i++)
+  for(i=0;i<sizeof(IEE802154_DataFrameHeader_t)-sizeof(uint8_t*) ;i++)
   {
-    RFD = ((uint8*)header)[i];
+    RFD = ((uint8_t*)header)[i];
   }
   
   /* finally write paylod to buffer */

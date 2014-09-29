@@ -13,7 +13,7 @@
 /**
  * Lenght of CRC in bytes
 */
-#define IEEE802154_CRCLENGTH                    (uint8)0x02
+#define IEEE802154_CRCLENGTH                    (uint8_t)0x02
    
 /**
  * Selected strobes for IEEE 802.15.4. See swru191d.pdf Chapter 23.14 Command 
@@ -90,8 +90,8 @@
 #define FRMCTRL0_ENERGY_SCAN_RECENT             0x00
 #define FRMCTRL0_ENERGY_SCAN_PEAK               0x10
 
-#define FREQCTRL_CHANNEL_OFFSET                 (uint8)11
-#define FREQCTRL_CHANNEL_FAKTOR                 (uint8)5
+#define FREQCTRL_CHANNEL_OFFSET                 (uint8_t)11
+#define FREQCTRL_CHANNEL_FAKTOR                 (uint8_t)5
 
 /**
  * interrupt flag bits 
@@ -107,15 +107,15 @@
   * Description of the fields are copied from Contiki project frame802154.h
   */
 typedef struct {
-  uint16 frameType : 3;               /**< 3 bit. Frame type field, see 802.15.4 */
-  uint16 securityEnabled : 1;         /**< 1 bit. True if security is used in this frame */
-  uint16 framePending : 1;            /**< 1 bit. True if sender has more data to send */
-  uint16 ackRequired : 1;             /**< 1 bit. Is an ack frame required? */
-  uint16 panIdCompression : 1;        /**< 1 bit. Is this a compressed header? */
-  uint16 unused : 3;                  /**< 3 bit. Unused bits (reserved) */
-  uint16 destinationAddressMode : 2;  /**< 2 bit. Destination address mode, see 802.15.4 */
-  uint16 frameVersion : 2;            /**< 2 bit. 802.15.4 frame version */
-  uint16 SourceAddressMode : 2;       /**< 2 bit. Source address mode, see 802.15.4 */
+  uint16_t frameType : 3;               /**< 3 bit. Frame type field, see 802.15.4 */
+  uint16_t securityEnabled : 1;         /**< 1 bit. True if security is used in this frame */
+  uint16_t framePending : 1;            /**< 1 bit. True if sender has more data to send */
+  uint16_t ackRequired : 1;             /**< 1 bit. Is an ack frame required? */
+  uint16_t panIdCompression : 1;        /**< 1 bit. Is this a compressed header? */
+  uint16_t unused : 3;                  /**< 3 bit. Unused bits (reserved) */
+  uint16_t destinationAddressMode : 2;  /**< 2 bit. Destination address mode, see 802.15.4 */
+  uint16_t frameVersion : 2;            /**< 2 bit. 802.15.4 frame version */
+  uint16_t SourceAddressMode : 2;       /**< 2 bit. Source address mode, see 802.15.4 */
 } IEEE802154_FCF_t;
 
   
@@ -125,22 +125,22 @@ typedef struct {
   */
 typedef struct {
   IEEE802154_FCF_t fcf;
-  uint8 sequenceNumber;
-  uint16 destinationPANID;
-  uint16 destinationAddress;
+  uint8_t sequenceNumber;
+  uint16_t destinationPANID;
+  uint16_t destinationAddress;
 #ifndef IEE802154_ENABLE_PANID_COMPRESSION
-  uint16 sourcePANID;
+  uint16_t sourcePANID;
 #endif
-  uint16 sourceAddress;
+  uint16_t sourceAddress;
   /* TODO: add security stuff here */
-  uint8 *payload;                       /**< pointer to payload */
+  uint8_t *payload;                       /**< pointer to payload */
 } IEE802154_DataFrameHeader_t;
 
 /*******************| Global variables |*******************************/
 
 /*******************| Function prototypes |****************************/
 void IEE802154_radioInit();
-void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8 payloadLength);
+void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8_t payloadLength);
 #endif
 
 /** @}*/
