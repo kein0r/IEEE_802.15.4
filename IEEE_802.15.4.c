@@ -113,10 +113,10 @@ void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8_t p
   
   /* write length first. Size of header (without pointer to payload) + 
      payloadlength + 2 bytes CRC */
-  RFD = (sizeof(IEE802154_DataFrameHeader_t)-sizeof(uint8_t*)) + payloadLength + IEEE802154_CRCLENGTH;
+  RFD = (sizeof(IEE802154_DataFrameHeader_t)-sizeof(IEE802154_PayloadPointer)) + payloadLength + IEEE802154_CRCLENGTH;
   
   /* now write IEE 802.15.4 header (without pointer to payload of course) */
-  for(i=0;i<sizeof(IEE802154_DataFrameHeader_t)-sizeof(uint8_t*) ;i++)
+  for(i=0;i<sizeof(IEE802154_DataFrameHeader_t)-sizeof(IEE802154_PayloadPointer) ;i++)
   {
     RFD = ((uint8_t*)header)[i];
   }

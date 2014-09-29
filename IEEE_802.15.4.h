@@ -118,7 +118,8 @@ typedef struct {
   uint16_t SourceAddressMode : 2;       /**< 2 bit. Source address mode, see 802.15.4 */
 } IEEE802154_FCF_t;
 
-  
+ 
+typedef uint8_t *IEE802154_PayloadPointer;
 /**
   * \brief IEEE 802.15.4 frame header according to 802.15.4g-2012 Chapter 5.2.1 General MAC frame format
   * and 5.2.2.2 Data frame format
@@ -133,7 +134,7 @@ typedef struct {
 #endif
   uint16_t sourceAddress;
   /* TODO: add security stuff here */
-  uint8_t *payload;                       /**< pointer to payload */
+  IEE802154_PayloadPointer payload;   /**< pointer to payload */
 } IEE802154_DataFrameHeader_t;
 
 /*******************| Global variables |*******************************/
