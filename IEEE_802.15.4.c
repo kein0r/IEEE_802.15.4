@@ -134,3 +134,4 @@ void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8 pay
   while ((RFIRQF1 & RFIRQF1_TXDONE) == 0) ;
   clearInterruptFlag(RFIRQF1, RFIRQF1_TXDONE);   // Clear TX interrupt
 }
+/** @}*/

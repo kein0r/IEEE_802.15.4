@@ -132,7 +132,7 @@ typedef struct {
   uint16 sourcePANID;
 #endif
   uint16 sourceAddress;
-  /* todo: add security stuff here */
+  /* TODO: add security stuff here */
   uint8 *payload;                       /**< pointer to payload */
 } IEE802154_DataFrameHeader_t;
 
