@@ -21,7 +21,7 @@
  * note enabled by this function. Thus, need to call enableAllInterrupt();
  * outside of this function
 */
-void IEE802154_radioInit()
+void IEE802154_radioInit(IEEE802154_Config_t *config)
 {
   
   /* Configure frama handline (FRMCTRL0) use auto ACK and auto CRC for convenience */
@@ -39,15 +39,18 @@ void IEE802154_radioInit()
      with 16 channels 5 MHz apart. The channels are numbered 11 through 26. For an
      IEEE 802.15.4-2006 compliant system, the only valid settings are thus
      FREQ[6:0] = 11 + 5 (channel number – 11).*/   
-  FREQCTRL =  FREQCTRL_CHANNEL_OFFSET + FREQCTRL_CHANNEL_FAKTOR * (IEEE802154_Channel - FREQCTRL_CHANNEL_OFFSET);
+  FREQCTRL =  FREQCTRL_CHANNEL_OFFSET + FREQCTRL_CHANNEL_FAKTOR * (config->Channel - FREQCTRL_CHANNEL_OFFSET);
     
   /* set short address */
-  SHORT_ADDR0 = LO_UINT16(IEEE802154_ShortAddress);
-  SHORT_ADDR1 = HI_UINT16(IEEE802154_ShortAddress);
+  if (config->ShortAddress != IEEE802154_USE_64BIT_ADDRESSING)
+  {
+    SHORT_ADDR0 = LO_UINT16(config->ShortAddress);
+    SHORT_ADDR1 = HI_UINT16(config->ShortAddress);
+  }
     
   /* set PANID */
-  PAN_ID0 = LO_UINT16(IEEE802154_PanID);
-  PAN_ID1 = HI_UINT16(IEEE802154_PanID);
+  PAN_ID0 = LO_UINT16(config->PanID);
+  PAN_ID1 = HI_UINT16(config->PanID);
   
   /* enable general RF interrupt */
   enableInterrupt(IEN2, IEN2_RFIE);
@@ -75,7 +78,7 @@ __near_func __interrupt void IEE802154_radioRxISR(void)
     payloadLength = RFD;      
     
     /* ACK frame ? */
-    if (payloadLength == RADIO_ACK_PACKET_SIZE)
+    if (payloadLength == IEEE802154_ACK_PACKET_SIZE)
     {
       
     }

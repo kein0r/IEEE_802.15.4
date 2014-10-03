@@ -9,12 +9,19 @@
 #include <IEEE_802.15.4_cfg.h>
    
 /*******************| Macros |*****************************************/
-
 /**
  * Lenght of CRC in bytes
 */
 #define IEEE802154_CRCLENGTH                    (uint8_t)0x02
-   
+
+/**
+ * According to 802.15.4 "5.2.2.3 Acknowledgment frame format" standard acknowledge frame
+ * is 3 bytes plus CRC (2/4 bytes) long
+*/
+#define IEEE802154_ACK_PACKET_SIZE              (uint8_t)0x03 + IEEE802154_CRCLENGTH
+
+#define IEEE802154_USE_64BIT_ADDRESSING         0xfffe
+
 /**
  * Selected strobes for IEEE 802.15.4. See swru191d.pdf Chapter 23.14 Command 
  * Strobe/CSMA-CA Processor. Quote: "The CSP interfaces with the CPU through the 
@@ -100,7 +107,17 @@
 #define RFIRQF1_TXDONE                          0x02
 #define IEN2_RFIE                               0x01
 
-   
+
+/*******************| Type definitions |*******************************/
+/**
+  * \brief IEEE 802.15.4 config.
+  */
+typedef struct {
+  uint8_t Channel;   /**< Channel to be used for IEEE 802.15.4 radio. The channels are numbered 11 through 26. */
+  uint16_t ShortAddress;
+  uint16_t PanID;
+} IEEE802154_Config_t;
+
 /*******************| Type definitions |*******************************/
 /**
   * \brief IEEE 802.15.4 frame control field (fcf)
@@ -118,18 +135,20 @@ typedef struct {
   uint16_t SourceAddressMode : 2;       /**< 2 bit. Source address mode, see 802.15.4 */
 } IEEE802154_FCF_t;
 
- 
+typedef uint8_t IEE802154_Payload;
 typedef uint8_t *IEE802154_PayloadPointer;
+
 /**
   * \brief IEEE 802.15.4 frame header according to 802.15.4g-2012 Chapter 5.2.1 General MAC frame format
   * and 5.2.2.2 Data frame format
+  * NOTE: No CRC is added here since hardware will add it automatically
   */
 typedef struct {
   IEEE802154_FCF_t fcf;
   uint8_t sequenceNumber;
   uint16_t destinationPANID;
   uint16_t destinationAddress;
-#ifndef IEE802154_ENABLE_PANID_COMPRESSION
+#ifndef IEEE802154_ENABLE_PANID_COMPRESSION
   uint16_t sourcePANID;
 #endif
   uint16_t sourceAddress;
@@ -140,7 +159,7 @@ typedef struct {
 /*******************| Global variables |*******************************/
 
 /*******************| Function prototypes |****************************/
-void IEE802154_radioInit();
+void IEE802154_radioInit(IEEE802154_Config_t *config);
 void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8_t payloadLength);
 #endif
 
