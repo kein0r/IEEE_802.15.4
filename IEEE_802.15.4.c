@@ -21,7 +21,7 @@
  * note enabled by this function. Thus, need to call enableAllInterrupt();
  * outside of this function
 */
-void IEE802154_radioInit(IEEE802154_Config_t *config)
+void IEEE802154_radioInit(IEEE802154_Config_t *config)
 {
   
   /* Configure frama handline (FRMCTRL0) use auto ACK and auto CRC for convenience */
@@ -66,7 +66,7 @@ void IEE802154_radioInit(IEEE802154_Config_t *config)
  * ISR for radio Rx interrupt
 */
 #pragma vector = RF_VECTOR
-__near_func __interrupt void IEE802154_radioRxISR(void)
+__near_func __interrupt void IEEE802154_radioRxISR(void)
 {
   uint8_t overallBufferLength;
   uint8_t payloadLength;
@@ -104,7 +104,7 @@ __near_func __interrupt void IEE802154_radioRxISR(void)
  * @param: payloadLength: length of frame payload excluding header and CRC
  * NOTE: only auto-crc is supported right now
 */
-void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8_t payloadLength)
+void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t payloadLength)
 {
   uint8_t i;
   
@@ -116,10 +116,10 @@ void IEE802154_radioSentDataFrame(IEE802154_DataFrameHeader_t* header, uint8_t p
   
   /* write length first. Size of header (without pointer to payload) + 
      payloadlength + 2 bytes CRC */
-  RFD = (sizeof(IEE802154_DataFrameHeader_t)-sizeof(IEE802154_PayloadPointer)) + payloadLength + IEEE802154_CRCLENGTH;
+  RFD = (sizeof(IEEE802154_DataFrameHeader_t)-sizeof(IEEE802154_PayloadPointer)) + payloadLength + IEEE802154_CRCLENGTH;
   
-  /* now write IEE 802.15.4 header (without pointer to payload of course) */
-  for(i=0;i<sizeof(IEE802154_DataFrameHeader_t)-sizeof(IEE802154_PayloadPointer) ;i++)
+  /* now write IEEE 802.15.4 header (without pointer to payload of course) */
+  for(i=0;i<sizeof(IEEE802154_DataFrameHeader_t)-sizeof(IEEE802154_PayloadPointer) ;i++)
   {
     RFD = ((uint8_t*)header)[i];
   }
