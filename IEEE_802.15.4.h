@@ -59,29 +59,29 @@
 #define IEEE802154_ISFLUSHTX()                  RFST = 0xEE
 
 /**
- * For an explanation see 802.15.4g-2012.pdf Chapter 5.2.1.1 Frame Control field.
+ * For detailed explenation see 802.15.4-2006 Chapter "7.2.1.1 Frame Control field"
  * Values for IEEE802154_FCF_t
 */
 /* frame type 3bit 0:2 */
-#define IEEE802154_FRAME_TYPE_BEACON            0x00
-#define IEEE802154_FRAME_TYPE_DATA              0x01
-#define IEEE802154_FRAME_TYPE_ACKNOWLEDGE       0x02
-#define IEEE802154_FRAME_TYPE_MAC_COMMAND       0x03
+#define IEEE802154_FCF_FRAME_TYPE_BEACON            0x00
+#define IEEE802154_FCF_FRAME_TYPE_DATA              0x01
+#define IEEE802154_FCF_FRAME_TYPE_ACKNOWLEDGE       0x02
+#define IEEE802154_FCF_FRAME_TYPE_MAC_COMMAND       0x03
 /* security 1 bit 3* */
-#define IEEE802154_SECURITY_DISABLED            0x00
-#define IEEE802154_SECURITY_ENABLED             0x01
+#define IEEE802154_FCF_SECURITY_DISABLED            0x00
+#define IEEE802154_FCF_SECURITY_ENABLED             0x01
 /* pending 1 bit 4 */
 /* acknowledgement required 1 bit 5 */
-#define IEEE802154_ACKNOWLEDGE_NOT_REQUIRED     0x00
-#define IEEE802154_ACKNOWLEDGE_REQUIRED         0x01
+#define IEEE802154_FCF_ACKNOWLEDGE_NOT_REQUIRED     0x00
+#define IEEE802154_FCF_ACKNOWLEDGE_REQUIRED         0x01
 /* pan id compression 1 bit 6*/
-#define IEEE802154_PANIDCOMPRESSION_DISABLED    0x01
-#define IEEE802154_PANIDCOMPRESSION_ENABLED     0x01
+#define IEEE802154_FCF_PANIDCOMPRESSION_DISABLED    0x00
+#define IEEE802154_FCF_PANIDCOMPRESSION_ENABLED     0x01
 /* 3 bit reserved 7-9 */
 /* destination address mode 2 bit 10:11 */
-#define IEEE802154_ADDRESS_MODE_NONE            0x00
-#define IEEE802154_ADDRESS_MODE_16BIT           0x02
-#define IEEE802154_ADDRESS_MODE_64BIT           0x03
+#define IEEE802154_FCF_ADDRESS_MODE_NONE            0x00
+#define IEEE802154_FCF_ADDRESS_MODE_16BIT           0x02
+#define IEEE802154_FCF_ADDRESS_MODE_64BIT           0x03
 /* frame version 2 bit 12:13 */
 /* source address mode 2 bit 14:15 */
 
@@ -122,6 +122,7 @@ typedef struct {
 /**
   * \brief IEEE 802.15.4 frame control field (fcf)
   * Description of the fields are copied from Contiki project frame802154.h
+  * See also 802.15.4-2006 Chapter "7.2.1.1 Frame Control field"
   */
 typedef struct {
   uint16_t frameType : 3;               /**< 3 bit. Frame type field, see 802.15.4 */
