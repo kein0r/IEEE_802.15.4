@@ -107,6 +107,19 @@
 #define RFIRQF1_TXDONE                          0x02
 #define IEN2_RFIE                               0x01
 
+/**
+ * IEEE 802.15.4 unique IEEE address from the TI range of addresses.
+ */
+#define IEEE_EXTENDED_ADDRESS0                  XREG( 0x780C )
+#define IEEE_EXTENDED_ADDRESS1                  XREG( 0x780D )
+#define IEEE_EXTENDED_ADDRESS2                  XREG( 0x780E )
+#define IEEE_EXTENDED_ADDRESS3                  XREG( 0x780F )
+#define IEEE_EXTENDED_ADDRESS4                  XREG( 0x7810 )
+#define IEEE_EXTENDED_ADDRESS5                  XREG( 0x7811 )
+#define IEEE_EXTENDED_ADDRESS6                  XREG( 0x7812 )
+#define IEEE_EXTENDED_ADDRESS7                  XREG( 0x7813 )
+
+
 
 /*******************| Type definitions |*******************************/
 /**

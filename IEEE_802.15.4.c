@@ -41,11 +41,22 @@ void IEEE802154_radioInit(IEEE802154_Config_t *config)
      FREQ[6:0] = 11 + 5 (channel number – 11).*/   
   FREQCTRL =  FREQCTRL_CHANNEL_OFFSET + FREQCTRL_CHANNEL_FAKTOR * (config->Channel - FREQCTRL_CHANNEL_OFFSET);
     
-  /* set short address */
+  /* set short address if configured, if not set extended address to factory preset */
   if (config->ShortAddress != IEEE802154_USE_64BIT_ADDRESSING)
   {
     SHORT_ADDR0 = LO_UINT16(config->ShortAddress);
     SHORT_ADDR1 = HI_UINT16(config->ShortAddress);
+  }
+  else
+  {
+    EXT_ADDR0 = IEEE_EXTENDED_ADDRESS0;
+    EXT_ADDR1 = IEEE_EXTENDED_ADDRESS1;
+    EXT_ADDR2 = IEEE_EXTENDED_ADDRESS2;
+    EXT_ADDR3 = IEEE_EXTENDED_ADDRESS3;
+    EXT_ADDR4 = IEEE_EXTENDED_ADDRESS4;
+    EXT_ADDR5 = IEEE_EXTENDED_ADDRESS5;
+    EXT_ADDR6 = IEEE_EXTENDED_ADDRESS6;
+    EXT_ADDR7 = IEEE_EXTENDED_ADDRESS7;
   }
     
   /* set PANID */
