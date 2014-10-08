@@ -148,4 +148,16 @@ void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t
   while ((RFIRQF1 & RFIRQF1_TXDONE) == 0) ;
   clearInterruptFlag(RFIRQF1, RFIRQF1_TXDONE);   // Clear TX interrupt
 }
+
+/** Retransmission of the last frame sent (i.e. in case no ack was received).
+ * See Chapter 23.8.4 Retransmission "After a frame has been successfully transmitted, 
+ * the FIFO contents are left unchanged. To retransmit the same frame, simply restart 
+ * TX by issuing an STXON or STXONCCA command strobe. Note that a retransmission of a 
+ * packet is only possible if the packet has been completely transmitted; i.e., a 
+ * packet cannot be aborted and then be retransmitted." */
+void IEEE802154_retransmit()
+{
+  // Enable TX after calibration
+  IEEE802154_ISTXON();
+}
 /** @}*/

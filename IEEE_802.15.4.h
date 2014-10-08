@@ -6,7 +6,7 @@
 
 /*******************| Inclusions |*************************************/
 #include <PlatformTypes.h>
-#include <IEEE_802.15.4_cfg.h>
+#include <Config.h>
    
 /*******************| Macros |*****************************************/
 /**
@@ -153,8 +153,17 @@ typedef uint8_t IEEE802154_Payload;
 typedef uint8_t *IEEE802154_PayloadPointer;
 
 /**
-  * \brief IEEE 802.15.4 frame header according to 802.15.4g-2012 Chapter 5.2.1 General MAC frame format
-  * and 5.2.2.2 Data frame format
+  For later use as address type when switching from 16 to 32bit addressing
+*/
+typedef struct
+{
+  uint16_t shortAdrress;
+  uint32_t addressLow;
+  uint32_t addressHigh;
+} IEEE802154_Adress_t;
+
+/**
+  * \brief IEEE 802.15.4 frame header according to 802.15.4g-2012 Chapter 7.2.1 General MAC frame format
   * NOTE: No CRC is added here since hardware will add it automatically
   */
 typedef struct {
@@ -175,6 +184,7 @@ typedef struct {
 /*******************| Function prototypes |****************************/
 void IEEE802154_radioInit(IEEE802154_Config_t *config);
 void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t payloadLength);
+void IEEE802154_retransmit();
 #endif
 
 /** @}*/
