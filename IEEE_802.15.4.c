@@ -41,23 +41,18 @@ void IEEE802154_radioInit(IEEE802154_Config_t *config)
      FREQ[6:0] = 11 + 5 (channel number – 11).*/   
   FREQCTRL =  FREQCTRL_CHANNEL_OFFSET + FREQCTRL_CHANNEL_FAKTOR * (config->Channel - FREQCTRL_CHANNEL_OFFSET);
     
-  /* set short address if configured, if not set extended address to factory preset */
-  if (config->ShortAddress != IEEE802154_USE_64BIT_ADDRESSING)
-  {
-    SHORT_ADDR0 = LO_UINT16(config->ShortAddress);
-    SHORT_ADDR1 = HI_UINT16(config->ShortAddress);
-  }
-  else
-  {
-    EXT_ADDR0 = IEEE_EXTENDED_ADDRESS0;
-    EXT_ADDR1 = IEEE_EXTENDED_ADDRESS1;
-    EXT_ADDR2 = IEEE_EXTENDED_ADDRESS2;
-    EXT_ADDR3 = IEEE_EXTENDED_ADDRESS3;
-    EXT_ADDR4 = IEEE_EXTENDED_ADDRESS4;
-    EXT_ADDR5 = IEEE_EXTENDED_ADDRESS5;
-    EXT_ADDR6 = IEEE_EXTENDED_ADDRESS6;
-    EXT_ADDR7 = IEEE_EXTENDED_ADDRESS7;
-  }
+  /* set short address to configured value and extended address to factory preset. Which value will be used
+   * during data reception is defined by frame header */
+  SHORT_ADDR0 = LO_UINT16(config->address.shortAddress);
+  SHORT_ADDR1 = HI_UINT16(config->address.shortAddress);
+  EXT_ADDR0 = IEEE_EXTENDED_ADDRESS0;
+  EXT_ADDR1 = IEEE_EXTENDED_ADDRESS1;
+  EXT_ADDR2 = IEEE_EXTENDED_ADDRESS2;
+  EXT_ADDR3 = IEEE_EXTENDED_ADDRESS3;
+  EXT_ADDR4 = IEEE_EXTENDED_ADDRESS4;
+  EXT_ADDR5 = IEEE_EXTENDED_ADDRESS5;
+  EXT_ADDR6 = IEEE_EXTENDED_ADDRESS6;
+  EXT_ADDR7 = IEEE_EXTENDED_ADDRESS7;
     
   /* set PANID */
   PAN_ID0 = LO_UINT16(config->PanID);
@@ -127,14 +122,45 @@ void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t
   
   /* write length first. Size of header (without pointer to payload) + 
      payloadlength + 2 bytes CRC */
-  RFD = (sizeof(IEEE802154_DataFrameHeader_t)-sizeof(IEEE802154_PayloadPointer)) + payloadLength + IEEE802154_CRCLENGTH;
+  if (header->sourceAddress.shortAddress == IEEE802154_USE_64BIT_ADDRESSING)
+  {
+    RFD = IEEE802154_HEADERSIZE_64BITADDRESS + payloadLength + IEEE802154_CRCLENGTH;
+  }
+  else {
+    RFD = IEEE802154_HEADERSIZE_16BITADDRESS + payloadLength + IEEE802154_CRCLENGTH;
+  }
   
-  /* now write IEEE 802.15.4 header (without pointer to payload of course) */
-  for(i=0;i<sizeof(IEEE802154_DataFrameHeader_t)-sizeof(IEEE802154_PayloadPointer) ;i++)
+  /* Write 2 bytes frame control field, 1 byte sequence number, and 2 bytes destination pan ID */
+  for( i=0; i< IEEE802154_HEADERSIZE_STATIC ;i++ )
   {
     RFD = ((uint8_t*)header)[i];
   }
-  
+  if (header->sourceAddress.shortAddress == IEEE802154_USE_64BIT_ADDRESSING)
+  {
+    for( i=0; i< sizeof(IEEE802154_ExtendedAddress_t); i++ )
+    {
+      RFD = header->destinationAddress.extendedAdress[i];
+    }
+  }
+  else {
+    RFD = LO_UINT16(header->destinationAddress.shortAddress);
+    RFD = HI_UINT16(header->destinationAddress.shortAddress);
+  }
+#ifndef IEEE802154_ENABLE_PANID_COMPRESSION
+  RFD = header->sourcePANID;
+#endif
+  if (header->sourceAddress.shortAddress == IEEE802154_USE_64BIT_ADDRESSING)
+  {
+    for( i=0; i< sizeof(IEEE802154_ExtendedAddress_t); i++ )
+    {
+      RFD = header->sourceAddress.extendedAdress[i];
+    }
+  }
+  else {
+    RFD = LO_UINT16(header->sourceAddress.shortAddress);
+    RFD = HI_UINT16(header->sourceAddress.shortAddress);
+  }
+
   /* finally write paylod to buffer */
   for(i=0;i<payloadLength ;i++)
   {

@@ -119,16 +119,32 @@
 #define IEEE_EXTENDED_ADDRESS6                  XREG( 0x7812 )
 #define IEEE_EXTENDED_ADDRESS7                  XREG( 0x7813 )
 
-
+#define IEEE802154_HEADERSIZE_16BITADDRESS      sizeof(IEEE802154_DataFrameHeader_t) - (2 * sizeof(IEEE802154_ExtendedAddress_t)) - sizeof(IEEE802154_PayloadPointer)
+#define IEEE802154_HEADERSIZE_64BITADDRESS      sizeof(IEEE802154_DataFrameHeader_t) - (2 * sizeof(IEEE802154_ShortAddress_t)) - sizeof(IEEE802154_PayloadPointer)
+#define IEEE802154_HEADERSIZE_STATIC            sizeof(IEEE802154_FCF_t) + sizeof(uint8_t) + sizeof(IEEE802154_PANIdentifier_t)     /**< IEEE 802.15.4 header size without addresses as they may vary but including destination panID */
 
 /*******************| Type definitions |*******************************/
+
+typedef uint16_t IEEE802154_ShortAddress_t;             /**< 16bit short address for IEEE 802.15.4 radio */
+typedef uint8_t IEEE802154_ExtendedAddress_t[8];         /**< 64bit short address for IEEE 802.15.4 radio */
+typedef uint16_t IEEE802154_PANIdentifier_t;            /**< 16bit PAN Identifier */
+
+/**
+  For later use as address type when switching from 16 to 32bit addressing
+*/
+typedef struct
+{
+  IEEE802154_ShortAddress_t shortAddress;
+  IEEE802154_ExtendedAddress_t extendedAdress;
+} IEEE802154_Adress_t;
+
 /**
   * \brief IEEE 802.15.4 config.
   */
 typedef struct {
   uint8_t Channel;   /**< Channel to be used for IEEE 802.15.4 radio. The channels are numbered 11 through 26. */
-  uint16_t ShortAddress;
-  uint16_t PanID;
+  IEEE802154_Adress_t address;
+  IEEE802154_PANIdentifier_t PanID;
 } IEEE802154_Config_t;
 
 /*******************| Type definitions |*******************************/
@@ -148,33 +164,23 @@ typedef struct {
   uint16_t frameVersion : 2;            /**< 2 bit. 802.15.4 frame version */
   uint16_t SourceAddressMode : 2;       /**< 2 bit. Source address mode, see 802.15.4 */
 } IEEE802154_FCF_t;
-
+  
 typedef uint8_t IEEE802154_Payload;
-typedef uint8_t *IEEE802154_PayloadPointer;
-
-/**
-  For later use as address type when switching from 16 to 32bit addressing
-*/
-typedef struct
-{
-  uint16_t shortAdrress;
-  uint32_t addressLow;
-  uint32_t addressHigh;
-} IEEE802154_Adress_t;
+typedef IEEE802154_Payload *IEEE802154_PayloadPointer;
 
 /**
   * \brief IEEE 802.15.4 frame header according to 802.15.4g-2012 Chapter 7.2.1 General MAC frame format
-  * NOTE: No CRC is added here since hardware will add it automatically
+  * NOTE: No CRC is added here as hardware will add it automatically
   */
 typedef struct {
   IEEE802154_FCF_t fcf;
   uint8_t sequenceNumber;
-  uint16_t destinationPANID;
-  uint16_t destinationAddress;
+  IEEE802154_PANIdentifier_t destinationPANID;
+  IEEE802154_Adress_t destinationAddress;
 #ifndef IEEE802154_ENABLE_PANID_COMPRESSION
-  uint16_t sourcePANID;
+  IEEE802154_PANIdentifier_t sourcePANID;
 #endif
-  uint16_t sourceAddress;
+  IEEE802154_Adress_t sourceAddress;
   /* TODO: add security stuff here */
   IEEE802154_PayloadPointer payload;   /**< pointer to payload */
 } IEEE802154_DataFrameHeader_t;
