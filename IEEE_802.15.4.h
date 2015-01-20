@@ -79,11 +79,13 @@
 #define IEEE802154_FCF_PANIDCOMPRESSION_ENABLED     0x01
 /* 3 bit reserved 7-9 */
 /* destination address mode 2 bit 10:11 */
+/* source address mode 2 bit 14:15 */
 #define IEEE802154_FCF_ADDRESS_MODE_NONE            0x00
 #define IEEE802154_FCF_ADDRESS_MODE_16BIT           0x02
 #define IEEE802154_FCF_ADDRESS_MODE_64BIT           0x03
 /* frame version 2 bit 12:13 */
-/* source address mode 2 bit 14:15 */
+
+#define IEEE802154_BROADCAST_PAN_ID             (IEEE802154_PANIdentifier_t)0xffff
 
 /**
  * Definition for different register values needed for IEEE 802.15.4 radio
@@ -162,7 +164,7 @@ typedef struct {
   uint16_t unused : 3;                  /**< 3 bit. Unused bits (reserved) */
   uint16_t destinationAddressMode : 2;  /**< 2 bit. Destination address mode, see 802.15.4 */
   uint16_t frameVersion : 2;            /**< 2 bit. 802.15.4 frame version */
-  uint16_t SourceAddressMode : 2;       /**< 2 bit. Source address mode, see 802.15.4 */
+  uint16_t sourceAddressMode : 2;       /**< 2 bit. Source address mode, see 802.15.4 */
 } IEEE802154_FCF_t;
   
 typedef uint8_t IEEE802154_Payload;

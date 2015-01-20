@@ -122,10 +122,15 @@ void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t
   
   /* write length first. Size of header (without pointer to payload) + 
      payloadlength + 2 bytes CRC */
-  if (header->sourceAddress.shortAddress == IEEE802154_USE_64BIT_ADDRESSING)
+  if (header->fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_NONE)
+  {
+    RFD = payloadLength + IEEE802154_CRCLENGTH;
+  }
+  else if (header->fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
   {
     RFD = IEEE802154_HEADERSIZE_64BITADDRESS + payloadLength + IEEE802154_CRCLENGTH;
   }
+  /* default to 16 bit transmission if invalid value is given */
   else {
     RFD = IEEE802154_HEADERSIZE_16BITADDRESS + payloadLength + IEEE802154_CRCLENGTH;
   }
@@ -135,30 +140,36 @@ void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t
   {
     RFD = ((uint8_t*)header)[i];
   }
-  if (header->sourceAddress.shortAddress == IEEE802154_USE_64BIT_ADDRESSING)
+  if (header->fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
   {
     for( i=0; i< sizeof(IEEE802154_ExtendedAddress_t); i++ )
     {
       RFD = header->destinationAddress.extendedAdress[i];
     }
   }
-  else {
+  else if (header->fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_16BIT){
     RFD = LO_UINT16(header->destinationAddress.shortAddress);
     RFD = HI_UINT16(header->destinationAddress.shortAddress);
+  }
+  else {
+    /* nothing if IEEE802154_FCF_ADDRESS_MODE_NONE */
   }
 #ifndef IEEE802154_ENABLE_PANID_COMPRESSION
   RFD = header->sourcePANID;
 #endif
-  if (header->sourceAddress.shortAddress == IEEE802154_USE_64BIT_ADDRESSING)
+  if (header->fcf.sourceAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
   {
     for( i=0; i< sizeof(IEEE802154_ExtendedAddress_t); i++ )
     {
       RFD = header->sourceAddress.extendedAdress[i];
     }
   }
-  else {
+  else if (header->fcf.sourceAddressMode == IEEE802154_FCF_ADDRESS_MODE_16BIT) {
     RFD = LO_UINT16(header->sourceAddress.shortAddress);
     RFD = HI_UINT16(header->sourceAddress.shortAddress);
+  }
+  else {
+    /* nothing if IEEE802154_FCF_ADDRESS_MODE_NONE */
   }
 
   /* finally write paylod to buffer */
