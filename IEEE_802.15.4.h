@@ -20,8 +20,6 @@
 */
 #define IEEE802154_ACK_PACKET_SIZE              (uint8_t)0x03 + IEEE802154_CRCLENGTH
 
-#define IEEE802154_USE_64BIT_ADDRESSING         0xfffe
-
 /**
  * Selected strobes for IEEE 802.15.4. See swru191d.pdf Chapter 23.14 Command 
  * Strobe/CSMA-CA Processor. Quote: "The CSP interfaces with the CPU through the 
