@@ -119,8 +119,6 @@
 #define IEEE_EXTENDED_ADDRESS6                  XREG( 0x7812 )
 #define IEEE_EXTENDED_ADDRESS7                  XREG( 0x7813 )
 
-#define IEEE802154_HEADERSIZE_16BITADDRESS      sizeof(IEEE802154_DataFrameHeader_t) - (2 * sizeof(IEEE802154_ExtendedAddress_t)) - sizeof(IEEE802154_PayloadPointer)
-#define IEEE802154_HEADERSIZE_64BITADDRESS      sizeof(IEEE802154_DataFrameHeader_t) - (2 * sizeof(IEEE802154_ShortAddress_t)) - sizeof(IEEE802154_PayloadPointer)
 #define IEEE802154_HEADERSIZE_STATIC            sizeof(IEEE802154_FCF_t) + sizeof(uint8_t) + sizeof(IEEE802154_PANIdentifier_t)     /**< IEEE 802.15.4 header size without addresses as they may vary but including destination panID */
 
 /*******************| Type definitions |*******************************/

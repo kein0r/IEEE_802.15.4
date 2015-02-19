@@ -120,20 +120,26 @@ void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t
 
   clearInterruptFlag(RFIRQF1, RFIRQF1_TXDONE);   /* Clear TX interrupt */
   
-  /* write length first. Size of header (without pointer to payload) + 
-     payloadlength + 2 bytes CRC */
-  if (header->fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_NONE)
+  /* write length first. Size of header (without pointer to payload) + 2 * address 
+  (short or extended) payloadlength + 2 bytes CRC */
+  uint8_t txLength = IEEE802154_HEADERSIZE_STATIC + IEEE802154_CRCLENGTH;
+  if (header->fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
   {
-    RFD = payloadLength + IEEE802154_CRCLENGTH;
+    txLength += sizeof(IEEE802154_ExtendedAddress_t);
   }
-  else if (header->fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
+  if (header->fcf.sourceAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
   {
-    RFD = IEEE802154_HEADERSIZE_64BITADDRESS + payloadLength + IEEE802154_CRCLENGTH;
+    txLength += sizeof(IEEE802154_ExtendedAddress_t);
   }
-  /* default to 16 bit transmission if invalid value is given */
-  else {
-    RFD = IEEE802154_HEADERSIZE_16BITADDRESS + payloadLength + IEEE802154_CRCLENGTH;
+  if (header->fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_16BIT)
+  {
+    txLength += sizeof(IEEE802154_ShortAddress_t);
   }
+  if (header->fcf.sourceAddressMode == IEEE802154_FCF_ADDRESS_MODE_16BIT)
+  {
+    txLength += sizeof(IEEE802154_ShortAddress_t);
+  }
+  RFD = txLength;
   
   /* Write 2 bytes frame control field, 1 byte sequence number, and 2 bytes destination pan ID */
   for( i=0; i< IEEE802154_HEADERSIZE_STATIC ;i++ )
