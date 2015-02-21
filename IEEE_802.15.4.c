@@ -22,8 +22,7 @@
  * outside of this function
 */
 void IEEE802154_radioInit(IEEE802154_Config_t *config)
-{
-  
+{    
   /* Configure frama handline (FRMCTRL0) use auto ACK and auto CRC for convenience */
   FRMCTRL0 |= (FRMCTRL0_AUTOACK_ENABLED | FRMCTRL0_AUTOCRC_ENABLED);
     
@@ -69,27 +68,89 @@ void IEEE802154_radioInit(IEEE802154_Config_t *config)
 }
 
 /**
- * ISR for radio Rx interrupt
+ * ISR for IEEE 802.15.4 radio. ISR must check bits of RFIRQF0 to further check
+ * which situation happend. As of now only RXPKTDONE is used for data reception.
+ * In case a complete frame hase been received (RXPKTDONE) the ISR will first fill fcf 
+ * data, copy RSSI value, copy data to receive buffer and finally call call-back 
+ * function depending on which kind of frame was received.
+ * Access global variable defined by IEEE 802.15.4 module but definited by application.
 */
 #pragma vector = RF_VECTOR
-__near_func __interrupt void IEEE802154_radioRxISR(void)
+__near_func __interrupt void IEEE802154_radioISR(void)
 {
+  uint8_t i;
   uint8_t overallBufferLength;
   uint8_t payloadLength;
+  uint8_t *rxFramePtr = (uint8_t*)&IEEE802154_RxDataFrame;   /* Pointer used to copy rx data. This is bad, but efficient */
   if( RFIRQF0 & RFIRQF0_RXPKTDONE ) /* A complete frame has been received. */
   {
     /* get overall buffer length since it could be more than one frame in FIFO */
     overallBufferLength = RXFIFOCNT;
     /* handle receive interrupt, first read payload length from rx-buffer. */
-    payloadLength = RFD;      
+    payloadLength = RFD; 
     
-    /* ACK frame ? */
-    if (payloadLength == IEEE802154_ACK_PACKET_SIZE)
+    /* Read 2 bytes frame control field, 1 byte sequence number, and 2 bytes destination pan ID */
+    for( i=0; i< IEEE802154_HEADERSIZE_STATIC ;i++ )
     {
-      
+      *rxFramePtr++ = RFD;
     }
-    else /* nope, data frame */
+    payloadLength -= IEEE802154_HEADERSIZE_STATIC;
+    if (IEEE802154_RxDataFrame.fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_16BIT)
     {
+      *rxFramePtr++ = RFD;
+      *rxFramePtr++ = RFD;
+      payloadLength -= sizeof(IEEE802154_ShortAddress_t);
+    }
+    if (IEEE802154_RxDataFrame.fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
+    {
+      for( i=0; i< sizeof(IEEE802154_ExtendedAddress_t) ;i++ )
+      {
+        *rxFramePtr++ = RFD;
+      }
+      payloadLength -= sizeof(IEEE802154_ExtendedAddress_t);
+    }
+#ifndef IEEE802154_ENABLE_PANID_COMPRESSION
+    *rxFramePtr++ = RFD;
+    *rxFramePtr++ = RFD;
+    payloadLength -= sizeof(IEEE802154_PANIdentifier_t);
+#endif
+    if (IEEE802154_RxDataFrame.fcf.sourceAddressMode == IEEE802154_FCF_ADDRESS_MODE_16BIT)
+    {
+      *rxFramePtr++ = RFD;
+      *rxFramePtr++ = RFD;
+      payloadLength -= sizeof(IEEE802154_ShortAddress_t);
+    }
+    if (IEEE802154_RxDataFrame.fcf.sourceAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
+    {
+      for( i=0; i< sizeof(IEEE802154_ExtendedAddress_t) ;i++ )
+      {
+        *rxFramePtr++ = RFD;
+      }
+      payloadLength -= sizeof(IEEE802154_ExtendedAddress_t);
+    }
+    /* Copy remaining payload, this will add two more bytes with RSSI and Correlation value
+     * instead of CRC (see swru191c.pdf Chapter 23.9.7 Frame-Check Sequence) */
+    rxFramePtr = (uint8_t*)IEEE802154_RxDataFrame.payload;
+    for (i=0; i<payloadLength; i++)
+    {
+      *rxFramePtr++ = RFD;
+    }
+    /* Check which frame was received and call appropriate callback */
+    if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_BEACON)
+    {
+      IEEE802154_UserCbk_BeaconFrameReceived(payloadLength - IEEE802154_CRCLENGTH);
+    }
+    else if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_DATA)
+    {
+      IEEE802154_UserCbk_DataFrameReceived(payloadLength - IEEE802154_CRCLENGTH);
+    }
+    if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_ACKNOWLEDGE)
+    {
+      IEEE802154_UserCbk_AckFrameReceived(payloadLength - IEEE802154_CRCLENGTH);
+    }
+    else 
+    {
+      IEEE802154_UserCbk_MACCommandFrameReceived(payloadLength - IEEE802154_CRCLENGTH);
     }
     clearInterruptFlag(RFIRQF0, RFIRQF0_RXPKTDONE);  // Clear package received interrupt flag
     

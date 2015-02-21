@@ -184,11 +184,32 @@ typedef struct {
 } IEEE802154_DataFrameHeader_t;
 
 /*******************| Global variables |*******************************/
+/**
+ * Variable used to sent data via IEEE 802.15.4. Module only provides declaration, definition
+ * must be done by application. Important: Not only definition but also valid payload pointer
+ * must be provided.
+ */
+extern IEEE802154_DataFrameHeader_t  IEEE802154_TxDataFrame; 
+/**
+ * Variable used to receive data via IEEE 802.15.4. Module only provides declaration, definition
+ * must be done by application. Important: Not only definition but also valid payload pointer
+ * must be provided.
+ */
+extern IEEE802154_DataFrameHeader_t  IEEE802154_RxDataFrame;
+
 
 /*******************| Function prototypes |****************************/
 void IEEE802154_radioInit(IEEE802154_Config_t *config);
 void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t payloadLength);
 void IEEE802154_retransmit();
+
+/* callbacks from Rx ISR to notify application */
+extern void IEEE802154_UserCbk_BeaconFrameReceived(uint8_t payloadLength);
+extern void IEEE802154_UserCbk_DataFrameReceived(uint8_t payloadLength);
+extern void IEEE802154_UserCbk_AckFrameReceived(uint8_t payloadLength);
+extern void IEEE802154_UserCbk_MACCommandFrameReceived(uint8_t payloadLength);
+
+
 #endif
 
 /** @}*/
