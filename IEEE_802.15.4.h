@@ -13,6 +13,7 @@
  * Lenght of CRC in bytes
 */
 #define IEEE802154_CRCLENGTH                    (uint8_t)0x02
+#define IEEE802154_CRCOK_MASK                   (uint8_t)0x80   /* Mask to read CRC OK value in Rx ISR */
 
 /**
  * According to 802.15.4 "5.2.2.3 Acknowledgment frame format" standard acknowledge frame
@@ -84,6 +85,7 @@
 /* frame version 2 bit 12:13 */
 
 #define IEEE802154_BROADCAST_PAN_ID             (IEEE802154_PANIdentifier_t)0xffff
+#define IEEE802154_BROADCAST_ADDRESS_16BIT      (IEEE802154_ShortAddress_t)0xffff
 
 /**
  * Definition for different register values needed for IEEE 802.15.4 radio
@@ -204,10 +206,11 @@ void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t
 void IEEE802154_retransmit();
 
 /* callbacks from Rx ISR to notify application */
-extern void IEEE802154_UserCbk_BeaconFrameReceived(uint8_t payloadLength);
-extern void IEEE802154_UserCbk_DataFrameReceived(uint8_t payloadLength);
-extern void IEEE802154_UserCbk_AckFrameReceived(uint8_t payloadLength);
-extern void IEEE802154_UserCbk_MACCommandFrameReceived(uint8_t payloadLength);
+extern void IEEE802154_UserCbk_BeaconFrameReceived(uint8_t payloadLength, sint8_t rssi);
+extern void IEEE802154_UserCbk_DataFrameReceived(uint8_t payloadLength, sint8_t rssi);
+extern void IEEE802154_UserCbk_AckFrameReceived(uint8_t payloadLength, sint8_t rssi);
+extern void IEEE802154_UserCbk_MACCommandFrameReceived(uint8_t payloadLength, sint8_t rssi);
+extern void IEEE802154_UserCbk_CRCError(uint8_t payloadLength, sint8_t rssi);
 
 
 #endif

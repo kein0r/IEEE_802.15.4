@@ -42,8 +42,8 @@ void IEEE802154_radioInit(IEEE802154_Config_t *config)
     
   /* set short address to configured value and extended address to factory preset. Which value will be used
    * during data reception is defined by frame header */
-  SHORT_ADDR0 = LO_UINT16(config->address.shortAddress);
-  SHORT_ADDR1 = HI_UINT16(config->address.shortAddress);
+  SHORT_ADDR0 = HI_UINT16(config->address.shortAddress);
+  SHORT_ADDR1 = LO_UINT16(config->address.shortAddress);
   EXT_ADDR0 = IEEE_EXTENDED_ADDRESS0;
   EXT_ADDR1 = IEEE_EXTENDED_ADDRESS1;
   EXT_ADDR2 = IEEE_EXTENDED_ADDRESS2;
@@ -54,8 +54,8 @@ void IEEE802154_radioInit(IEEE802154_Config_t *config)
   EXT_ADDR7 = IEEE_EXTENDED_ADDRESS7;
     
   /* set PANID */
-  PAN_ID0 = LO_UINT16(config->PanID);
-  PAN_ID1 = HI_UINT16(config->PanID);
+  PAN_ID0 = HI_UINT16(config->PanID);
+  PAN_ID1 = LO_UINT16(config->PanID);
   
   /* enable general RF interrupt */
   enableInterrupt(IEN2, IEN2_RFIE);
@@ -71,8 +71,8 @@ void IEEE802154_radioInit(IEEE802154_Config_t *config)
  * ISR for IEEE 802.15.4 radio. ISR must check bits of RFIRQF0 to further check
  * which situation happend. As of now only RXPKTDONE is used for data reception.
  * In case a complete frame hase been received (RXPKTDONE) the ISR will first fill fcf 
- * data, copy RSSI value, copy data to receive buffer and finally call call-back 
- * function depending on which kind of frame was received.
+ * data and copy data to receive buffer. If crc is ok callback function depending 
+ * frame type is called.
  * Access global variable defined by IEEE 802.15.4 module but definited by application.
 */
 #pragma vector = RF_VECTOR
@@ -100,6 +100,7 @@ __near_func __interrupt void IEEE802154_radioISR(void)
       *rxFramePtr++ = RFD;
       *rxFramePtr++ = RFD;
       payloadLength -= sizeof(IEEE802154_ShortAddress_t);
+      rxFramePtr += sizeof(IEEE802154_ExtendedAddress_t);
     }
     if (IEEE802154_RxDataFrame.fcf.destinationAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
     {
@@ -108,6 +109,7 @@ __near_func __interrupt void IEEE802154_radioISR(void)
         *rxFramePtr++ = RFD;
       }
       payloadLength -= sizeof(IEEE802154_ExtendedAddress_t);
+      rxFramePtr += sizeof(IEEE802154_ShortAddress_t);
     }
 #ifndef IEEE802154_ENABLE_PANID_COMPRESSION
     *rxFramePtr++ = RFD;
@@ -119,6 +121,7 @@ __near_func __interrupt void IEEE802154_radioISR(void)
       *rxFramePtr++ = RFD;
       *rxFramePtr++ = RFD;
       payloadLength -= sizeof(IEEE802154_ShortAddress_t);
+      rxFramePtr += sizeof(IEEE802154_ExtendedAddress_t);
     }
     if (IEEE802154_RxDataFrame.fcf.sourceAddressMode == IEEE802154_FCF_ADDRESS_MODE_64BIT)
     {
@@ -127,30 +130,41 @@ __near_func __interrupt void IEEE802154_radioISR(void)
         *rxFramePtr++ = RFD;
       }
       payloadLength -= sizeof(IEEE802154_ExtendedAddress_t);
+      rxFramePtr += sizeof(IEEE802154_ShortAddress_t);
     }
-    /* Copy remaining payload, this will add two more bytes with RSSI and Correlation value
+    /* Copy remaining payload, ignore two more bytes with RSSI and Correlation value
      * instead of CRC (see swru191c.pdf Chapter 23.9.7 Frame-Check Sequence) */
+    payloadLength -= IEEE802154_CRCLENGTH;
     rxFramePtr = (uint8_t*)IEEE802154_RxDataFrame.payload;
     for (i=0; i<payloadLength; i++)
     {
       *rxFramePtr++ = RFD;
     }
+    /* Check CRC and copy RSSI */
+    sint8_t rssi = RFD;
+    uint8_t crc_ok = RFD;
     /* Check which frame was received and call appropriate callback */
-    if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_BEACON)
+    if (crc_ok & IEEE802154_CRCOK_MASK)
     {
-      IEEE802154_UserCbk_BeaconFrameReceived(payloadLength - IEEE802154_CRCLENGTH);
+      if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_BEACON)
+      {
+        IEEE802154_UserCbk_BeaconFrameReceived(payloadLength, rssi);
+      }
+      else if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_DATA)
+      {
+        IEEE802154_UserCbk_DataFrameReceived(payloadLength, rssi);
+      }
+      if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_ACKNOWLEDGE)
+      {
+        IEEE802154_UserCbk_AckFrameReceived(payloadLength, rssi);
+      }
+      else 
+      {
+        IEEE802154_UserCbk_MACCommandFrameReceived(payloadLength, rssi);
+      }
     }
-    else if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_DATA)
-    {
-      IEEE802154_UserCbk_DataFrameReceived(payloadLength - IEEE802154_CRCLENGTH);
-    }
-    if (IEEE802154_RxDataFrame.fcf.frameType == IEEE802154_FCF_FRAME_TYPE_ACKNOWLEDGE)
-    {
-      IEEE802154_UserCbk_AckFrameReceived(payloadLength - IEEE802154_CRCLENGTH);
-    }
-    else 
-    {
-      IEEE802154_UserCbk_MACCommandFrameReceived(payloadLength - IEEE802154_CRCLENGTH);
+    else {
+      IEEE802154_UserCbk_CRCError(payloadLength, rssi);
     }
     clearInterruptFlag(RFIRQF0, RFIRQF0_RXPKTDONE);  // Clear package received interrupt flag
     
@@ -163,7 +177,6 @@ __near_func __interrupt void IEEE802154_radioISR(void)
    S1CON = 0;
    IEEE802154_ISFLUSHRX();
 }
-
 
 /**
  * Blocking send of data frame via radio.
@@ -232,8 +245,8 @@ void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t
     }
   }
   else if (header->fcf.sourceAddressMode == IEEE802154_FCF_ADDRESS_MODE_16BIT) {
-    RFD = LO_UINT16(header->sourceAddress.shortAddress);
     RFD = HI_UINT16(header->sourceAddress.shortAddress);
+    RFD = LO_UINT16(header->sourceAddress.shortAddress);
   }
   else {
     /* nothing if IEEE802154_FCF_ADDRESS_MODE_NONE */
