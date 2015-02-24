@@ -42,8 +42,8 @@ void IEEE802154_radioInit(IEEE802154_Config_t *config)
     
   /* set short address to configured value and extended address to factory preset. Which value will be used
    * during data reception is defined by frame header */
-  SHORT_ADDR0 = HI_UINT16(config->address.shortAddress);
-  SHORT_ADDR1 = LO_UINT16(config->address.shortAddress);
+  SHORT_ADDR0 = HI_UINT16(config->shortAddress);
+  SHORT_ADDR1 = LO_UINT16(config->shortAddress);
   EXT_ADDR0 = IEEE_EXTENDED_ADDRESS0;
   EXT_ADDR1 = IEEE_EXTENDED_ADDRESS1;
   EXT_ADDR2 = IEEE_EXTENDED_ADDRESS2;

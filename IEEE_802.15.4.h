@@ -143,7 +143,7 @@ typedef struct
   */
 typedef struct {
   uint8_t Channel;   /**< Channel to be used for IEEE 802.15.4 radio. The channels are numbered 11 through 26. */
-  IEEE802154_Adress_t address;
+  IEEE802154_ShortAddress_t shortAddress;    /**< Short address for this device. Extended address will always be device own 8 byte serial number */
   IEEE802154_PANIdentifier_t PanID;
 } IEEE802154_Config_t;
 
