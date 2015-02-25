@@ -59,7 +59,7 @@
 
 /**
  * For detailed explenation see 802.15.4-2006 Chapter "7.2.1.1 Frame Control field"
- * Values for IEEE802154_FCF_t
+ * Values for #IEEE802154_FCF_t
 */
 /* frame type 3bit 0:2 */
 #define IEEE802154_FCF_FRAME_TYPE_BEACON            0x00
@@ -149,7 +149,7 @@ typedef struct {
 
 /*******************| Type definitions |*******************************/
 /**
-  * \brief IEEE 802.15.4 frame control field (fcf)
+  * \brief IEEE 802.15.4 frame control field (fcf).
   * Description of the fields are copied from Contiki project frame802154.h
   * See also 802.15.4-2006 Chapter "7.2.1.1 Frame Control field"
   */
@@ -181,7 +181,7 @@ typedef struct {
   IEEE802154_PANIdentifier_t sourcePANID;
 #endif
   IEEE802154_Adress_t sourceAddress;
-  /* TODO: add security stuff here */
+  /* @todo add security stuff here */
   IEEE802154_PayloadPointer payload;   /**< pointer to payload */
 } IEEE802154_DataFrameHeader_t;
 

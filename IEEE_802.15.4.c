@@ -1,3 +1,6 @@
+/** @ingroup IEEE_802.15.4
+ * @{
+ */
 /*******************| Inclusions |*************************************/
 #include "IEEE_802.15.4.h"
 #include <ioCC2530.h>
@@ -73,7 +76,7 @@ void IEEE802154_radioInit(IEEE802154_Config_t *config)
  * In case a complete frame hase been received (RXPKTDONE) the ISR will first fill fcf 
  * data and copy data to receive buffer. If crc is ok callback function depending 
  * frame type is called.
- * Access global variable defined by IEEE 802.15.4 module but definited by application.
+ * Access global variable declared by IEEE 802.15.4 module but definited by application.
 */
 #pragma vector = RF_VECTOR
 __near_func __interrupt void IEEE802154_radioISR(void)
@@ -168,7 +171,7 @@ __near_func __interrupt void IEEE802154_radioISR(void)
     }
     clearInterruptFlag(RFIRQF0, RFIRQF0_RXPKTDONE);  // Clear package received interrupt flag
     
-    /** TODO: read RSSI or LQI to global variable */
+    /** @todo read RSSI or LQI to global variable */
   }
   /* according to (swru191c.pdf) 23.1.2 Interrupt Registers
      To clear an interrupt from the RF Core, one must clear two flags, both the flag 
@@ -180,15 +183,15 @@ __near_func __interrupt void IEEE802154_radioISR(void)
 
 /**
  * Blocking send of data frame via radio.
- * @param: header: header of frame including pointer to payload
- * @param: payloadLength: length of frame payload excluding header and CRC
- * NOTE: only auto-crc is supported right now
+ * @param header header of frame including pointer to payload
+ * @param payloadLength length of frame payload excluding header and CRC
+ * @note Only auto-crc is supported right now
 */
 void IEEE802154_radioSentDataFrame(IEEE802154_DataFrameHeader_t* header, uint8_t payloadLength)
 {
   uint8_t i;
   
-  /* todo: check length */
+  /* @todo check length */
 
   IEEE802154_ISFLUSHTX();          /* Flush TX FIFO */
 
