@@ -4,7 +4,7 @@
 /*******************| Inclusions |*************************************/
 #include "IEEE_802.15.4.h"
 #include <ioCC2530.h>
-#include <board.h>
+#include <cc253x.h>
 
 /**
  * Implementation only covers MAC layer since PHYS layer is completely handled by
